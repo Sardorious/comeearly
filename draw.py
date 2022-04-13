@@ -1,4 +1,7 @@
+import matplotlib
 import matplotlib.pyplot as plt
+
+matplotlib.use('Agg')
 
 
 def save_img(name: str) -> str:
