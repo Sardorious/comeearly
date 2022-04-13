@@ -25,3 +25,4 @@ jobs:
           HD_WEATHER_API_KEY: ${{secrets.WEATHER_API_KEY}}
           HD_HOST: "https://work-log-py.herokuapp.com/"
           HD_TZ: "Asia/Taipei"
+          HD_ON_HEROKU: 1

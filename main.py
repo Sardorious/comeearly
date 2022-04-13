@@ -87,17 +87,18 @@ def main(token: str) -> None:
     dispatcher.add_handler(CommandHandler("checkout", checkout))
     dispatcher.add_handler(CommandHandler("draw", draw))
 
-    # webhook
-    updater.start_webhook(
-        listen="0.0.0.0",
-        port=int(os.environ.get("PORT", "8443")),
-        url_path=token,
-        webhook_url=os.getenv("HOST") + token,
-    )
-    updater.idle()
-
-    # local testing
-    # updater.start_polling()
+    if os.getenv("ON_HEROKU"):
+        # webhook
+        updater.start_webhook(
+            listen="0.0.0.0",
+            port=int(os.environ.get("PORT", "8443")),
+            url_path=token,
+            webhook_url=os.getenv("HOST") + token,
+        )
+        updater.idle()
+    else:
+        # local testing
+        updater.start_polling()
 
 
 if __name__ == "__main__":
