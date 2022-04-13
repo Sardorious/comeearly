@@ -1,0 +1,27 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: write google api key
+        shell: bash
+        env:
+          GOOGLE_API_CREDENTIAL: ${{secrets.GOOGLE_API_CREDENTIAL}}
+        run: 'echo "$GOOGLE_API_CREDENTIAL" > ./credential.json'
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "work-log-py"
+          heroku_email: "yoyochen0530@gmail.com"
+        env:
+          HD_TG_BOT_TOKEN: ${{secrets.TG_BOT_TOKEN}}
+          HD_TG_BOT_USER: ${{secrets.TG_BOT_USER}}
+          HD_GOOGLE_SHEET_KEY: ${{secrets.GOOGLE_SHEET_KEY}}
+          HD_WEATHER_API_KEY: ${{secrets.WEATHER_API_KEY}}
+          HD_HOST: "https://work-log-py.herokuapp.com/"
+          HD_TZ: "Asia/Taipei"
