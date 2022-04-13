@@ -2,13 +2,14 @@ import logging
 import os
 from datetime import datetime as dt
 
+import pandas as pd
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Updater
 
+from draw import save_img
 from google_api import get_sheet
 from wx import get_weather
-from draw import save_img
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -65,9 +66,16 @@ def checkout(update: Update, context: CallbackContext):
 
 
 def draw(update: Update, context: CallbackContext):
-    filename = save_img("test")
-    update.message.reply_photo(filename)
-    os.remove(filename)
+    sheet = get_sheet()
+    df = pd.DataFrame(sheet.get_all_records())
+
+    # df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    df = df[df["check_type"] == "in"]
+
+    print(df)
+
+    img_buf = save_img(df["date"], df["check_time"], df["minT"], df["maxT"])
+    update.message.reply_photo(img_buf)
 
 
 def main(token: str) -> None:
