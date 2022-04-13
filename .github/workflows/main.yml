@@ -13,9 +13,6 @@ jobs:
         env:
           GOOGLE_API_CREDENTIAL: ${{secrets.GOOGLE_API_CREDENTIAL}}
         run: 'echo "$GOOGLE_API_CREDENTIAL" > ./credential.json'
-      - name: ls
-        shell: bash
-        run: 'ls'
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
