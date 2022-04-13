@@ -1,13 +1,14 @@
 import logging
 import os
 from datetime import datetime as dt
+
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import Updater, CallbackContext, CommandHandler
+from telegram.ext import CallbackContext, CommandHandler, Updater
 
-from wx import get_weather
 from google_api import get_sheet
-
+from wx import get_weather
+from draw import save_img
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -63,6 +64,12 @@ def checkout(update: Update, context: CallbackContext):
     update.message.reply_text(pretty_print(row_data))
 
 
+def draw(update: Update, context: CallbackContext):
+    filename = save_img("test")
+    update.message.reply_photo(filename)
+    os.remove(filename)
+
+
 def main(token: str) -> None:
     updater = Updater(token=token)
     dispatcher = updater.dispatcher
@@ -70,13 +77,14 @@ def main(token: str) -> None:
     dispatcher.add_handler(CommandHandler("start", help_cmd))
     dispatcher.add_handler(CommandHandler("checkin", checkin))
     dispatcher.add_handler(CommandHandler("checkout", checkout))
+    dispatcher.add_handler(CommandHandler("draw", draw))
 
     # webhook
     updater.start_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get("PORT", "8443")),
         url_path=token,
-        webhook_url=os.getenv("HOST") + token
+        webhook_url=os.getenv("HOST") + token,
     )
     updater.idle()
 
