@@ -74,9 +74,11 @@ def main(token: str) -> None:
     # webhook
     updater.start_webhook(
         listen="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)), url_path=token
+        port=int(os.environ.get("PORT", "8443")),
+        url_path=token,
+        webhook_url=os.getenv("HOST") + token
     )
-    updater.bot.setWebhook(os.getenv("HOST") + token)
+    updater.idle()
 
     # local testing
     # updater.start_polling()
