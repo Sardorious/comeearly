@@ -73,7 +73,8 @@ def main(token: str) -> None:
 
     # webhook
     updater.start_webhook(
-        listen="0.0.0.0", port=int(os.getenv("PORT")), url_path=token
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)), url_path=token
     )
     updater.bot.setWebhook(os.getenv("HOST") + token)
 
