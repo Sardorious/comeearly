@@ -20,7 +20,7 @@ def pretty_print(row: list) -> str:
         f"\U0001F4C5: {row[0]}",
         f"\U000023F0: {row[1]}",
         f"\U00002600: {row[3]}",
-        f"\U0001F326: {row[4]} %",
+        f"\U0001F326: {row[4]}%",
         f"\U0001F321: {row[5]} ~ {row[6]}\U00002103",
         f"\U00002728: {row[7]}",
     ]
@@ -59,7 +59,7 @@ def checkout(update: Update, context: CallbackContext):
     row_data = [time_day, time_now, "out"] + get_weather()
     sheet.append_row(row_data, value_input_option="USER_ENTERED")
 
-    update.message.reply_text("\U0001F331 Check out successfully")
+    update.message.reply_text("\U00002728 Check out successfully")
     update.message.reply_text(pretty_print(row_data))
 
 
