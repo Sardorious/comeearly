@@ -5,6 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 def get_sheet():
     scopes = ["https://spreadsheets.google.com/feeds"]
+    print(os.listdir("./"))
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
         "./credential.json", scopes
     )
