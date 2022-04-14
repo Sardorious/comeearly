@@ -23,7 +23,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-TYPE_CHOICE, PLOT_TIMESERIES, PLOT_CORRELATION = range(3)
+TYPE_CHOICE, PLOT_TYPE, = range(2)
 DRAW_TYPE = ["Timeseries", "Correlation"]
 
 
@@ -94,6 +94,7 @@ def choose_plot_type(update: Update, context: CallbackContext) -> int:
     df = pd.DataFrame(sheet.get_all_records())
     df["datetime"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     context.user_data["df"] = df
+    context.user_data["plot_type"] = update.message.text
 
     update.message.reply_text(
         "Which Month do you want to inspect?\n",
@@ -108,17 +109,10 @@ def choose_plot_type(update: Update, context: CallbackContext) -> int:
             one_time_keyboard=True,
         ),
     )
-
-    if update.message.text == DRAW_TYPE[0]:
-        return PLOT_TIMESERIES
-    elif update.message.text == DRAW_TYPE[1]:
-        return PLOT_CORRELATION
-    else:
-        update.message.reply_text("No such plot implemented")
-    return ConversationHandler.END
+    return PLOT_TYPE
 
 
-def timeseries_plot(update: Update, context: CallbackContext) -> int:
+def plot_type(update: Update, context: CallbackContext) -> int:
     df = context.user_data["df"]
     df = df[df["check_type"] == "in"]
 
@@ -127,21 +121,11 @@ def timeseries_plot(update: Update, context: CallbackContext) -> int:
         user_month_choice = int(dt.strptime(user_ans, "%b").strftime("%m"))
         df = df[(df["datetime"].dt.month == user_month_choice)]
 
-    img_buf = plot_timeseries(df, user_ans)
-    update.message.reply_photo(img_buf)
-    return ConversationHandler.END
+    if context.user_data["plot_type"] == DRAW_TYPE[0]:
+        img_buf = plot_timeseries(df, user_ans)
+    elif context.user_data["plot_type"] == DRAW_TYPE[1]:
+        img_buf = plot_reg(df, user_ans)
 
-
-def correlation_plot(update: Update, context: CallbackContext) -> int:
-    df = context.user_data["df"]
-    df = df[df["check_type"] == "in"]
-
-    user_ans = update.message.text
-    if user_ans != "All":
-        user_month_choice = int(dt.strptime(user_ans, "%b").strftime("%m"))
-        df = df[(df["datetime"].dt.month == user_month_choice)]
-
-    img_buf = plot_reg(df, user_ans)
     update.message.reply_photo(img_buf)
     return ConversationHandler.END
 
@@ -162,15 +146,8 @@ def main(token: str) -> None:
                     Filters.text & ~Filters.command, choose_plot_type
                 )
             ],
-            PLOT_TIMESERIES: [
-                MessageHandler(
-                    Filters.text & ~Filters.command, timeseries_plot
-                )
-            ],
-            PLOT_CORRELATION: [
-                MessageHandler(
-                    Filters.text & ~Filters.command, correlation_plot
-                )
+            PLOT_TYPE: [
+                MessageHandler(Filters.text & ~Filters.command, plot_type)
             ],
         },
         fallbacks=[
