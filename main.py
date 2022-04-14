@@ -4,10 +4,17 @@ from datetime import datetime as dt
 
 import pandas as pd
 from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, Updater
+from telegram import ReplyKeyboardMarkup, Update
+from telegram.ext import (
+    CallbackContext,
+    CommandHandler,
+    ConversationHandler,
+    Filters,
+    MessageHandler,
+    Updater,
+)
 
-from draw import save_img
+from draw import plot_timeseries, plot_reg
 from google_api import get_sheet
 from wx import get_weather
 
@@ -15,6 +22,9 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
+
+TYPE_CHOICE, PLOT_TIMESERIES, PLOT_CORRELATION = range(3)
+DRAW_TYPE = ["Timeseries", "Correlation"]
 
 
 def pretty_print(row: list) -> str:
@@ -65,17 +75,75 @@ def checkout(update: Update, context: CallbackContext):
     update.message.reply_text(pretty_print(row_data))
 
 
-def draw(update: Update, context: CallbackContext):
+def draw_start(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [DRAW_TYPE]
+
+    update.message.reply_text(
+        "Which plot do you want?\n" "Send /cancel to stop.",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard,
+            one_time_keyboard=True,
+            input_field_placeholder="",
+        ),
+    )
+    return TYPE_CHOICE
+
+
+def choose_plot_type(update: Update, context: CallbackContext) -> int:
     sheet = get_sheet()
     df = pd.DataFrame(sheet.get_all_records())
+    df["datetime"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    context.user_data["df"] = df
 
-    # df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    update.message.reply_text(
+        "Which Month do you want to inspect?\n",
+        reply_markup=ReplyKeyboardMarkup(
+            [
+                [
+                    dt.strptime(str(i), "%m").strftime("%b")
+                    for i in set(df["datetime"].dt.month.values)
+                ]
+                + ["All"]
+            ],
+            one_time_keyboard=True,
+        ),
+    )
+
+    if update.message.text == DRAW_TYPE[0]:
+        return PLOT_TIMESERIES
+    elif update.message.text == DRAW_TYPE[1]:
+        return PLOT_CORRELATION
+    else:
+        update.message.reply_text("No such plot implemented")
+    return ConversationHandler.END
+
+
+def timeseries_plot(update: Update, context: CallbackContext) -> int:
+    df = context.user_data["df"]
     df = df[df["check_type"] == "in"]
 
-    print(df)
+    user_ans = update.message.text
+    if user_ans != "All":
+        user_month_choice = int(dt.strptime(user_ans, "%b").strftime("%m"))
+        df = df[(df["datetime"].dt.month == user_month_choice)]
 
-    img_buf = save_img(df["date"], df["check_time"], df["minT"], df["maxT"])
+    img_buf = plot_timeseries(df, user_ans)
     update.message.reply_photo(img_buf)
+    return ConversationHandler.END
+
+
+def correlation_plot(update: Update, context: CallbackContext) -> int:
+    df = context.user_data["df"]
+    df = df[df["check_type"] == "in"]
+
+    user_ans = update.message.text
+    if user_ans != "All":
+        user_month_choice = int(dt.strptime(user_ans, "%b").strftime("%m"))
+        df = df[(df["datetime"].dt.month == user_month_choice)]
+
+    img_buf = plot_reg(df, user_ans)
+    update.message.reply_photo(img_buf)
+    return ConversationHandler.END
 
 
 def main(token: str) -> None:
@@ -85,7 +153,31 @@ def main(token: str) -> None:
     dispatcher.add_handler(CommandHandler("start", help_cmd))
     dispatcher.add_handler(CommandHandler("checkin", checkin))
     dispatcher.add_handler(CommandHandler("checkout", checkout))
-    dispatcher.add_handler(CommandHandler("draw", draw))
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("draw", draw_start)],
+        states={
+            TYPE_CHOICE: [
+                MessageHandler(
+                    Filters.text & ~Filters.command, choose_plot_type
+                )
+            ],
+            PLOT_TIMESERIES: [
+                MessageHandler(
+                    Filters.text & ~Filters.command, timeseries_plot
+                )
+            ],
+            PLOT_CORRELATION: [
+                MessageHandler(
+                    Filters.text & ~Filters.command, correlation_plot
+                )
+            ],
+        },
+        fallbacks=[
+            CommandHandler("cancel", lambda c, u: ConversationHandler.END)
+        ],
+    )
+    dispatcher.add_handler(conv_handler)
 
     if os.getenv("ON_HEROKU"):
         # webhook
@@ -95,10 +187,11 @@ def main(token: str) -> None:
             url_path=token,
             webhook_url=os.getenv("HOST") + token,
         )
-        updater.idle()
     else:
         # local testing
         updater.start_polling()
+
+    updater.idle()
 
 
 if __name__ == "__main__":
