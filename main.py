@@ -115,7 +115,7 @@ def choose_plot_type(update: Update, context: CallbackContext) -> int:
     context.user_data["plot_type"] = update.message.text
 
     update.message.reply_text(
-        "Which Month do you want to inspect?\n",
+        "Which month do you want to inspect?\n",
         reply_markup=ReplyKeyboardMarkup(
             [
                 [
