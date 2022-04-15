@@ -23,7 +23,10 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-TYPE_CHOICE, PLOT_TYPE, = range(2)
+(
+    TYPE_CHOICE,
+    PLOT_TYPE,
+) = range(2)
 DRAW_TYPE = ["Timeseries", "Correlation"]
 
 
@@ -75,6 +78,20 @@ def checkout(update: Update, context: CallbackContext):
     update.message.reply_text(pretty_print(row_data))
 
 
+def today(update: Update, context: CallbackContext):
+    sheet = get_sheet()
+    df = pd.DataFrame(sheet.get_all_records())
+    today_str = dt.now().strftime("%Y-%m-%d")
+    today_row = df[
+        (df["check_type"] == "in")
+        & (df["date"] == today_str)
+    ].values
+    if len(today_row) == 0:
+        update.message.reply_text(f"There is no data in {today_str}")
+        return
+    update.message.reply_text(pretty_print(today_row[0]))
+
+
 def draw_start(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [DRAW_TYPE]
 
@@ -82,6 +99,7 @@ def draw_start(update: Update, context: CallbackContext) -> int:
         "Which plot do you want?\n" "Send /cancel to stop.",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard,
+            resize_keyboard=True,
             one_time_keyboard=True,
             input_field_placeholder="",
         ),
@@ -106,6 +124,7 @@ def choose_plot_type(update: Update, context: CallbackContext) -> int:
                 ]
                 + ["All"]
             ],
+            resize_keyboard=True,
             one_time_keyboard=True,
         ),
     )
@@ -137,6 +156,7 @@ def main(token: str) -> None:
     dispatcher.add_handler(CommandHandler("start", help_cmd))
     dispatcher.add_handler(CommandHandler("checkin", checkin))
     dispatcher.add_handler(CommandHandler("checkout", checkout))
+    dispatcher.add_handler(CommandHandler("today", today))
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("draw", draw_start)],
