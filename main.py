@@ -81,6 +81,7 @@ def checkout(update: Update, context: CallbackContext):
 def today(update: Update, context: CallbackContext):
     print(f"update_id: {update.update_id}")
     print(f"chat_id: {update.message.chat_id}")
+    print(f"{update}")
     sheet = get_sheet()
     df = pd.DataFrame(sheet.get_all_records())
     today_str = dt.now().strftime("%Y-%m-%d")
