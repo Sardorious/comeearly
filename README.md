@@ -83,6 +83,7 @@ Reference: [Deploy a Telegram Bot using Heroku](https://towardsdatascience.ggcom
 
 Send message to tg bot directly from api. So you can easily create something
 more useful like using `ios shortcut` send msg directly.
+[*Reference*](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates)
 
 E.g.
 
