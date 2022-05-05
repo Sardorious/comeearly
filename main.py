@@ -54,12 +54,8 @@ def checkin(update: Update, context: CallbackContext):
     if not ownership(str(update.message.chat_id)):
         update.message.reply_text("You are not the owner sorry \U0001F972")
         return
-    time_day = dt.today().strftime("%Y-%m-%d")
-    time_now = dt.today().strftime("%H:%M:%S")
-    print("send: ", update.message.date.astimezone().strftime("%Y-%m-%d"))
-    print("send: ", update.message.date.astimezone().strftime("%H:%M:%S"))
-    print("now: ", time_day)
-    print("now: ", time_now)
+    time_day = update.message.date.astimezone().strftime("%Y-%m-%d")
+    time_now = update.message.date.astimezone().strftime("%H:%M:%S")
     row_data = [time_day, time_now, "in"] + get_weather()
     sheet = get_sheet()
     sheet.append_row(row_data, value_input_option="USER_ENTERED")
@@ -72,8 +68,8 @@ def checkout(update: Update, context: CallbackContext):
     if not ownership(str(update.message.chat_id)):
         update.message.reply_text("You are not the owner sorry \U0001F972")
         return
-    time_day = dt.today().strftime("%Y-%m-%d")
-    time_now = dt.today().strftime("%H:%M:%S")
+    time_day = update.message.date.astimezone().strftime("%Y-%m-%d")
+    time_now = update.message.date.astimezone().strftime("%H:%M:%S")
     sheet = get_sheet()
     row_data = [time_day, time_now, "out"] + get_weather()
     sheet.append_row(row_data, value_input_option="USER_ENTERED")
@@ -85,7 +81,7 @@ def checkout(update: Update, context: CallbackContext):
 def today(update: Update, context: CallbackContext):
     sheet = get_sheet()
     df = pd.DataFrame(sheet.get_all_records())
-    today_str = dt.now().strftime("%Y-%m-%d")
+    today_str = update.message.date.astimezone().strftime("%Y-%m-%d")
     today_row = df[
         (df["check_type"] == "in")
         & (df["date"] == today_str)
