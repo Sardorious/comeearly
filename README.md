@@ -17,7 +17,7 @@ tg message (e.g. checkin/checkout)
         ↳ insert a row to google sheet
 ```
 
-Available command
+### Available command
 
 - `\checkin`: record check in time
 - `\checkout`: record check out time
