@@ -56,8 +56,8 @@ def checkin(update: Update, context: CallbackContext):
         return
     time_day = dt.today().strftime("%Y-%m-%d")
     time_now = dt.today().strftime("%H:%M:%S")
-    print("send: ", update.message.date.strftime("%Y-%m-%d"))
-    print("send: ", update.message.date.strftime("%H:%M:%S"))
+    print("send: ", update.message.date.astimezone().strftime("%Y-%m-%d"))
+    print("send: ", update.message.date.astimezone().strftime("%H:%M:%S"))
     print("now: ", time_day)
     print("now: ", time_now)
     row_data = [time_day, time_now, "in"] + get_weather()
