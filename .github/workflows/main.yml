@@ -27,7 +27,6 @@ jobs:
           HD_TG_BOT_TOKEN: ${{secrets.TG_BOT_TOKEN}}
           HD_TG_BOT_USER: ${{secrets.TG_BOT_USER}}
           HD_GOOGLE_SHEET_KEY: ${{secrets.GOOGLE_SHEET_KEY}}
-          HD_WEATHER_API_KEY: ${{secrets.WEATHER_API_KEY}}
-          HD_HOST: "https://work-log-py.herokuapp.com/"
+          HD_HOST: "https://comeearly.herokuapp.com/"
           HD_TZ: "Asia/Taipei"
           HD_ON_HEROKU: 1
