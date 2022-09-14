@@ -17,7 +17,7 @@ from telegram.ext import (
 from draw import plot_timeseries, plot_reg
 from google_api import get_sheet
 #from wx import get_weather
-
+# Sardorios
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
