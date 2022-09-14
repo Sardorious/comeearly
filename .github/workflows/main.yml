@@ -21,8 +21,8 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "work-log-py"
-          heroku_email: "yoyochen0530@gmail.com"
+          heroku_app_name: "comeearly"
+          heroku_email: "sardor.tukhtaev@gmail.com"
         env:
           HD_TG_BOT_TOKEN: ${{secrets.TG_BOT_TOKEN}}
           HD_TG_BOT_USER: ${{secrets.TG_BOT_USER}}
