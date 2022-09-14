@@ -16,7 +16,7 @@ from telegram.ext import (
 
 from draw import plot_timeseries, plot_reg
 from google_api import get_sheet
-from wx import get_weather
+#from wx import get_weather
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -56,7 +56,7 @@ def checkin(update: Update, context: CallbackContext):
         return
     time_day = update.message.date.astimezone().strftime("%Y-%m-%d")
     time_now = update.message.date.astimezone().strftime("%H:%M:%S")
-    row_data = [time_day, time_now, "in"] + get_weather()
+    row_data = [time_day, time_now, "in"] 
     sheet = get_sheet()
     sheet.append_row(row_data, value_input_option="USER_ENTERED")
 
@@ -71,7 +71,7 @@ def checkout(update: Update, context: CallbackContext):
     time_day = update.message.date.astimezone().strftime("%Y-%m-%d")
     time_now = update.message.date.astimezone().strftime("%H:%M:%S")
     sheet = get_sheet()
-    row_data = [time_day, time_now, "out"] + get_weather()
+    row_data = [time_day, time_now, "out"] 
     sheet.append_row(row_data, value_input_option="USER_ENTERED")
 
     update.message.reply_text("\U00002728 Check out successfully")
