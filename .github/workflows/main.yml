@@ -28,5 +28,5 @@ jobs:
           HD_TG_BOT_USER: ${{secrets.TG_BOT_USER}}
           HD_GOOGLE_SHEET_KEY: ${{secrets.GOOGLE_SHEET_KEY}}
           HD_HOST: "https://comeearly.herokuapp.com/"
-          HD_TZ: "Asia/Taipei"
+          HD_TZ: "Asia/Tashkent"
           HD_ON_HEROKU: 1
